@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router";
 import { Params } from "react-router/lib/Router";
@@ -13,6 +13,7 @@ import teamAPI from "services/entities/teams";
 import { AppContext } from "context/app";
 import { IHost } from "interfaces/host";
 import { ISoftware } from "interfaces/software";
+import { IHostPolicy } from "interfaces/host_policy";
 import { ILabel } from "interfaces/label";
 import { ITeam } from "interfaces/team";
 import { IQuery } from "interfaces/query";
@@ -42,24 +43,31 @@ import {
   humanHostEnrolled,
   humanHostMemory,
   humanHostDetailUpdated,
-  secondsToHms,
 } from "fleet/helpers"; // @ts-ignore
 import SelectQueryModal from "./SelectQueryModal";
 import TransferHostModal from "./TransferHostModal";
+import PolicyDetailsModal from "./HostPoliciesTable/PolicyDetailsModal";
 import {
-  generateTableHeaders,
-  generateDataSet,
+  generatePolicyTableHeaders,
+  generatePolicyDataSet,
+} from "./HostPoliciesTable/HostPoliciesTableConfig";
+import {
+  generateSoftwareTableHeaders,
+  generateSoftwareDataSet,
 } from "./SoftwareTable/SoftwareTableConfig";
 import {
   generatePackTableHeaders,
   generatePackDataSet,
 } from "./PackTable/PackTableConfig";
 import EmptySoftware from "./EmptySoftware";
+import PolicyFailingCount from "./HostPoliciesTable/PolicyFailingCount";
 
 import BackChevron from "../../../../assets/images/icon-chevron-down-9x6@2x.png";
 import DeleteIcon from "../../../../assets/images/icon-action-delete-14x14@2x.png";
 import TransferIcon from "../../../../assets/images/icon-action-transfer-16x16@2x.png";
 import QueryIcon from "../../../../assets/images/icon-action-query-16x16@2x.png";
+import InfoBanner from "components/InfoBanner";
+import { isValidPolicyResponse } from "../ManageHostsPage/helpers";
 
 const baseClass = "host-details";
 
@@ -102,6 +110,12 @@ const HostDetailsPage = ({
     false
   );
   const [showQueryHostModal, setShowQueryHostModal] = useState<boolean>(false);
+  const [showPolicyDetailsModal, setPolicyDetailsModal] = useState(false);
+
+  const togglePolicyDetailsModal = useCallback(() => {
+    setPolicyDetailsModal(!showPolicyDetailsModal);
+  }, [showPolicyDetailsModal, setPolicyDetailsModal]);
+
   const [
     showRefetchLoadingSpinner,
     setShowRefetchLoadingSpinner,
@@ -465,6 +479,55 @@ const HostDetailsPage = ({
     );
   };
 
+  const renderPolicies = () => {
+    const tableHeaders = generatePolicyTableHeaders(togglePolicyDetailsModal);
+    const noPolicyResponses: IHostPolicy[] =
+      host?.policies.filter(
+        (policy) => !isValidPolicyResponse(policy.response)
+      ) || [];
+
+    return (
+      <div className="section section--policies">
+        <p className="section__header">Policies</p>
+
+        {host?.policies.length && (
+          <>
+            <PolicyFailingCount policyList={host?.policies} />
+            {noPolicyResponses.length > 0 && (
+              <InfoBanner>
+                <p>
+                  This host is not updating the response for some policies.
+                  Check&nbsp;
+                  <a
+                    href="https://fleetdm.com/docs/using-fleet/faq#why-my-host-is-not-updating-a-policys-response"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    out the Fleet documentation on why the response might not be
+                    updating.
+                  </a>
+                </p>
+              </InfoBanner>
+            )}
+            <TableContainer
+              columns={tableHeaders}
+              data={generatePolicyDataSet(host.policies)}
+              isLoading={isLoadingHost}
+              defaultSortHeader={"name"}
+              defaultSortDirection={"asc"}
+              resultsTitle={"policy items"}
+              emptyComponent={() => <></>}
+              showMarkAllPages={false}
+              isAllPagesSelected={false}
+              disablePagination
+              disableCount
+            />
+          </>
+        )}
+      </div>
+    );
+  };
+
   const renderUsers = () => {
     const { users } = host || {};
     const wrapperClassName = `${baseClass}__table`;
@@ -504,7 +567,7 @@ const HostDetailsPage = ({
   };
 
   const renderSoftware = () => {
-    const tableHeaders = generateTableHeaders();
+    const tableHeaders = generateSoftwareTableHeaders();
 
     return (
       <div className="section section--software">
@@ -526,7 +589,7 @@ const HostDetailsPage = ({
             {host?.software && (
               <TableContainer
                 columns={tableHeaders}
-                data={generateDataSet(softwareState)}
+                data={generateSoftwareDataSet(softwareState)}
                 isLoading={isLoadingHost}
                 defaultSortHeader={"name"}
                 defaultSortDirection={"asc"}
@@ -786,29 +849,7 @@ const HostDetailsPage = ({
           {renderMDMData()}
         </div>
       </div>
-      <div className="section osquery col-50">
-        <p className="section__header">Agent options</p>
-        <div className="info-grid">
-          <div className="info-grid__block">
-            <span className="info-grid__header">Config TLS refresh</span>
-            <span className="info-grid__data">
-              {wrapKolideHelper(secondsToHms, osqueryData.config_tls_refresh)}
-            </span>
-          </div>
-          <div className="info-grid__block">
-            <span className="info-grid__header">Logger TLS period</span>
-            <span className="info-grid__data">
-              {wrapKolideHelper(secondsToHms, osqueryData.logger_tls_period)}
-            </span>
-          </div>
-          <div className="info-grid__block">
-            <span className="info-grid__header">Distributed interval</span>
-            <span className="info-grid__data">
-              {wrapKolideHelper(secondsToHms, osqueryData.distributed_interval)}
-            </span>
-          </div>
-        </div>
-      </div>
+      {renderPolicies()}
       {renderLabels()}
       {renderPacks()}
       {renderUsers()}
@@ -831,6 +872,9 @@ const HostDetailsPage = ({
           teams={teams || []}
           isGlobalAdmin={isGlobalAdmin as boolean}
         />
+      )}
+      {!!host && showPolicyDetailsModal && (
+        <PolicyDetailsModal onCancel={togglePolicyDetailsModal} />
       )}
     </div>
   );
