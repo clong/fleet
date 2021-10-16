@@ -28,6 +28,8 @@ import Modal from "components/modals/Modal"; // @ts-ignore
 import SoftwareVulnerabilities from "pages/hosts/HostDetailsPage/SoftwareVulnerabilities"; // @ts-ignore
 import HostUsersListRow from "pages/hosts/HostDetailsPage/HostUsersListRow";
 import TableContainer from "components/TableContainer";
+import InfoBanner from "components/InfoBanner";
+import { isValidPolicyResponse } from "../ManageHostsPage/helpers";
 
 import {
   Accordion,
@@ -66,8 +68,6 @@ import BackChevron from "../../../../assets/images/icon-chevron-down-9x6@2x.png"
 import DeleteIcon from "../../../../assets/images/icon-action-delete-14x14@2x.png";
 import TransferIcon from "../../../../assets/images/icon-action-transfer-16x16@2x.png";
 import QueryIcon from "../../../../assets/images/icon-action-query-16x16@2x.png";
-import InfoBanner from "components/InfoBanner";
-import { isValidPolicyResponse } from "../ManageHostsPage/helpers";
 
 const baseClass = "host-details";
 
@@ -481,10 +481,12 @@ const HostDetailsPage = ({
 
   const renderPolicies = () => {
     const tableHeaders = generatePolicyTableHeaders(togglePolicyDetailsModal);
-    const noPolicyResponses: IHostPolicy[] =
+    const noResponses: IHostPolicy[] =
       host?.policies.filter(
         (policy) => !isValidPolicyResponse(policy.response)
       ) || [];
+    const failingResponses: IHostPolicy[] =
+      host?.policies.filter((policy) => policy.response === "fail") || [];
 
     return (
       <div className="section section--policies">
@@ -492,8 +494,10 @@ const HostDetailsPage = ({
 
         {host?.policies.length && (
           <>
-            <PolicyFailingCount policyList={host?.policies} />
-            {noPolicyResponses.length > 0 && (
+            {failingResponses.length > 0 && (
+              <PolicyFailingCount policyList={host?.policies} />
+            )}
+            {noResponses.length > 0 && (
               <InfoBanner>
                 <p>
                   This host is not updating the response for some policies.
