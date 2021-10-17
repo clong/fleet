@@ -154,6 +154,36 @@ const TeamDetailsWrapper = (props: ITeamDetailsPageProps): JSX.Element => {
     [dispatch, toggleEditTeamModal, team]
   );
 
+  // const renderTeamsFilterDropdown = () => {
+
+  //   const teamOptions = generateTeamFilterDropdownOptions(
+  //     teams || [],
+  //     currentUser,
+  //     isOnGlobalTeam as boolean
+  //   );
+  //   const selectedTeamId = getValidatedTeamId(
+  //     teams || [],
+  //     (policyId && policy?.team_id) || (currentTeam?.id as number),
+  //     currentUser,
+  //     isOnGlobalTeam as boolean
+  //   );
+
+  //   return (
+  //     <div>
+  //       <Dropdown
+  //         value={selectedTeamId}
+  //         placeholder={"All teams"}
+  //         className={`${baseClass}__team-dropdown`}
+  //         options={teamOptions}
+  //         searchable={false}
+  //         onChange={(newSelectedValue: number) =>
+  //           handleChangeSelectedTeamFilter(newSelectedValue)
+  //         }
+  //       />
+  //     </div>
+  //   );
+  // };
+
   if (isLoadingTeams || team === undefined) {
     return (
       <div className={`${baseClass}__loading-spinner`}>

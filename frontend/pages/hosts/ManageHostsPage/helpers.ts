@@ -144,6 +144,8 @@ export const generateTeamFilterDropdownOptions = (
     },
   ];
 
+  console.log("currentUserTeams: ", currentUserTeams);
+
   const sortedCurrentUserTeamOptions = getSortedTeamOptions(currentUserTeams);
 
   return allTeamsOption.concat(sortedCurrentUserTeamOptions);

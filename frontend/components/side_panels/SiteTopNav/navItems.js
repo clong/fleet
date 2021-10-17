@@ -3,6 +3,7 @@ import URL_PREFIX from "router/url_prefix";
 import permissionUtils from "utilities/permissions";
 
 export default (currentUser) => {
+  console.log("currentUser: ", currentUser);
   const adminNavItems = [
     {
       icon: "settings",
@@ -10,7 +11,10 @@ export default (currentUser) => {
       iconName: "settings",
       location: {
         regex: new RegExp(`^${URL_PREFIX}/settings/`),
-        pathname: PATHS.ADMIN_SETTINGS,
+        pathname:
+          currentUser.global_role === "admin"
+            ? PATHS.ADMIN_SETTINGS
+            : `${PATHS.ADMIN_TEAMS}/${currentUser.teams[0].id}/members`,
       },
     },
   ];
@@ -69,7 +73,10 @@ export default (currentUser) => {
     },
   ];
 
-  if (permissionUtils.isGlobalAdmin(currentUser)) {
+  if (
+    permissionUtils.isAnyTeamAdmin(currentUser) ||
+    permissionUtils.isGlobalAdmin(currentUser)
+  ) {
     return [
       ...userNavItems,
       ...teamMaintainerNavItems,

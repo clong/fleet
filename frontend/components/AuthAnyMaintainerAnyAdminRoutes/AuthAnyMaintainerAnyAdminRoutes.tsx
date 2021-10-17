@@ -8,7 +8,7 @@ import paths from "router/paths";
 // @ts-ignore
 import { renderFlash } from "redux/nodes/notifications/actions";
 
-interface IAuthAnyMaintainerGlobalAdminRoutesProps {
+interface IAuthAnyMaintainerAnyAdminRoutesProps {
   children: JSX.Element;
 }
 
@@ -21,10 +21,10 @@ interface IRootState {
 const { HOME } = paths;
 
 /**
- * Checks if a user is a global admin or global maintainer when routing
+ * Checks if a user is a any maintainer or any admin when routing
  */
-const AuthAnyMaintainerGlobalAdminRoutes = (
-  props: IAuthAnyMaintainerGlobalAdminRoutesProps
+const AuthAnyMaintainerAnyAdminRoutes = (
+  props: IAuthAnyMaintainerAnyAdminRoutesProps
 ): JSX.Element | null => {
   const { children } = props;
 
@@ -38,6 +38,7 @@ const AuthAnyMaintainerGlobalAdminRoutes = (
   if (
     !permissionUtils.isGlobalAdmin(user) &&
     !permissionUtils.isGlobalMaintainer(user) &&
+    !permissionUtils.isAnyTeamAdmin(user) &&
     !permissionUtils.isAnyTeamMaintainer(user)
   ) {
     dispatch(push(HOME));
@@ -47,4 +48,4 @@ const AuthAnyMaintainerGlobalAdminRoutes = (
   return <>{children}</>;
 };
 
-export default AuthAnyMaintainerGlobalAdminRoutes;
+export default AuthAnyMaintainerAnyAdminRoutes;
