@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
 import { push } from "react-router-redux";
@@ -6,6 +6,7 @@ import { Tab, TabList, Tabs } from "react-tabs";
 
 import PATHS from "router/paths";
 import { ITeam } from "interfaces/team";
+import { AppContext } from "context/app";
 // ignore TS error for now until these are rewritten in ts.
 // @ts-ignore
 import { renderFlash } from "redux/nodes/notifications/actions";
@@ -82,6 +83,8 @@ const TeamDetailsWrapper = (props: ITeamDetailsPageProps): JSX.Element => {
     location: { pathname },
     params: { team_id },
   } = props;
+
+  const { isGlobalAdmin } = useContext(AppContext);
 
   const isLoadingTeams = useSelector(
     (state: IRootState) => state.entities.teams.loading
@@ -197,10 +200,12 @@ const TeamDetailsWrapper = (props: ITeamDetailsPageProps): JSX.Element => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__nav-header`}>
-        <Link to={PATHS.ADMIN_TEAMS} className={`${baseClass}__back-link`}>
-          <img src={BackChevron} alt="back chevron" id="back-chevron" />
-          <span>Back to teams</span>
-        </Link>
+        {isGlobalAdmin && (
+          <Link to={PATHS.ADMIN_TEAMS} className={`${baseClass}__back-link`}>
+            <img src={BackChevron} alt="back chevron" id="back-chevron" />
+            <span>Back to teams</span>
+          </Link>
+        )}
         <div className={`${baseClass}__team-header`}>
           <div className={`${baseClass}__team-details`}>
             <h1>{team.name}</h1>
@@ -216,12 +221,14 @@ const TeamDetailsWrapper = (props: ITeamDetailsPageProps): JSX.Element => {
                 Edit team
               </>
             </Button>
-            <Button onClick={toggleDeleteTeamModal} variant={"text-icon"}>
-              <>
-                <img src={TrashIcon} alt="Delete team icon" />
-                Delete team
-              </>
-            </Button>
+            {isGlobalAdmin && (
+              <Button onClick={toggleDeleteTeamModal} variant={"text-icon"}>
+                <>
+                  <img src={TrashIcon} alt="Delete team icon" />
+                  Delete team
+                </>
+              </Button>
+            )}
           </div>
         </div>
         <Tabs

@@ -3,7 +3,6 @@ import URL_PREFIX from "router/url_prefix";
 import permissionUtils from "utilities/permissions";
 
 export default (currentUser) => {
-  console.log("currentUser: ", currentUser);
   const adminNavItems = [
     {
       icon: "settings",

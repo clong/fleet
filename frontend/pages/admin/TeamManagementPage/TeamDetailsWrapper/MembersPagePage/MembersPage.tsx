@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // @ts-ignore
 import memoize from "memoize-one";
@@ -7,6 +7,7 @@ import { IConfig } from "interfaces/config";
 import { IUser } from "interfaces/user";
 import { INewMembersBody, ITeam } from "interfaces/team";
 import { Link } from "react-router";
+import { AppContext } from "context/app";
 // ignore TS error for now until these are rewritten in ts.
 // @ts-ignore
 import { renderFlash } from "redux/nodes/notifications/actions";
@@ -78,6 +79,8 @@ const MembersPage = (props: IMembersPageProps): JSX.Element => {
   } = props;
   const teamId = parseInt(team_id, 10);
   const dispatch = useDispatch();
+
+  const { isGlobalAdmin } = useContext(AppContext);
 
   const isPremiumTier = useSelector((state: IRootState) => {
     return state.app.config.tier === "premium";
@@ -286,7 +289,11 @@ const MembersPage = (props: IMembersPageProps): JSX.Element => {
     <div className={baseClass}>
       <p className={`${baseClass}__page-description`}>
         Users can either be a member of team(s) or a global user.{" "}
-        <Link to={PATHS.ADMIN_USERS}>Manage users with global access here</Link>
+        {isGlobalAdmin && (
+          <Link to={PATHS.ADMIN_USERS}>
+            Manage users with global access here
+          </Link>
+        )}
       </p>
       {Object.keys(usersError).length > 0 ? (
         <TableDataError />

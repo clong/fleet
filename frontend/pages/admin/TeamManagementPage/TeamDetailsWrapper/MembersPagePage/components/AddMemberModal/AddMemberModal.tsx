@@ -28,6 +28,13 @@ const AddMemberModal = (props: IAddMemberModal): JSX.Element => {
     [setSelectedMembers]
   );
 
+  const onCreateUserClick = useCallback(
+    (values) => {
+      setSelectedMembers(values);
+    },
+    [setSelectedMembers]
+  );
+
   const onFormSubmit = useCallback(() => {
     const newMembers = selectedMembers.map((member: IDropdownOption) => {
       return { id: member.value as number, role: "observer" };
@@ -38,6 +45,7 @@ const AddMemberModal = (props: IAddMemberModal): JSX.Element => {
   return (
     <Modal onExit={onCancel} title={"Add Members"} className={baseClass}>
       <form className={`${baseClass}__form`}>
+        <p className="title">Add team members</p>
         <AutocompleteDropdown
           team={team}
           id={"member-autocomplete"}
@@ -47,6 +55,18 @@ const AddMemberModal = (props: IAddMemberModal): JSX.Element => {
           disabledOptions={disabledMembers}
           value={selectedMembers}
         />
+        <p>
+          User not here?&nbsp;
+          <Button
+            onClick={onCreateUserClick}
+            variant={"text-link"}
+            className={"light-text"}
+          >
+            <>
+              <strong>Create a user</strong>
+            </>
+          </Button>
+        </p>
         <div className={`${baseClass}__btn-wrap`}>
           <Button
             disabled={selectedMembers.length === 0}
